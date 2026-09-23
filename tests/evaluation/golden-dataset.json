@@ -1,0 +1,277 @@
+[
+  {
+    "id": "q1",
+    "question": "What is encapsulation in object oriented programming?",
+    "category": "definition",
+    "expectedIntent": "definition",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["encapsulation", "object", "oriented", "programming"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["data", "hiding", "class"]
+  },
+  {
+    "id": "q2",
+    "question": "Define polymorphism with real world examples",
+    "category": "definition",
+    "expectedIntent": "definition",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["polymorphism", "examples"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["forms", "overriding", "overloading"]
+  },
+  {
+    "id": "q3",
+    "question": "What is Newton's second law of motion?",
+    "category": "definition",
+    "expectedIntent": "definition",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["newton", "second", "law", "motion"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["force", "mass", "acceleration", "f=ma"]
+  },
+  {
+    "id": "q4",
+    "question": "Explain how Dijkstra's algorithm finds the shortest path in a graph",
+    "category": "mechanism",
+    "expectedIntent": "code",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["dijkstra", "algorithm", "shortest", "path", "graph"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["priority", "queue", "distance", "visited"]
+  },
+  {
+    "id": "q5",
+    "question": "How does virtual memory paging work in modern operating systems?",
+    "category": "mechanism",
+    "expectedIntent": "explanation",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["virtual", "memory", "paging", "operating", "systems"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["page", "frame", "mmu", "table"]
+  },
+  {
+    "id": "q6",
+    "question": "How does the TCP three-way handshake establish a reliable connection?",
+    "category": "mechanism",
+    "expectedIntent": "explanation",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["tcp", "three-way", "handshake", "connection"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["syn", "ack", "sequence"]
+  },
+  {
+    "id": "q7",
+    "question": "What is the difference between a stack and a queue data structure?",
+    "category": "comparison",
+    "expectedIntent": "comparison",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["difference", "stack", "queue", "structure"],
+    "expectedConcepts": ["stack", "queue"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["lifo", "fifo"]
+  },
+  {
+    "id": "q8",
+    "question": "Compare process vs thread in operating systems",
+    "category": "comparison",
+    "expectedIntent": "comparison",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["compare", "process", "thread", "operating", "systems"],
+    "expectedConcepts": ["process", "thread"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["memory", "shared", "overhead"]
+  },
+  {
+    "id": "q9",
+    "question": "TCP vs UDP: which one is better for live video streaming?",
+    "category": "comparison",
+    "expectedIntent": "comparison",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["tcp", "udp", "better", "video", "streaming"],
+    "expectedConcepts": ["tcp", "udp"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["latency", "reliability", "connectionless"]
+  },
+  {
+    "id": "q10",
+    "question": "Synchronous vs Asynchronous programming in JavaScript",
+    "category": "comparison",
+    "expectedIntent": "comparison",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["synchronous", "asynchronous", "programming", "javascript"],
+    "expectedConcepts": ["synchronous", "asynchronous"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["blocking", "event loop", "callback", "promise"]
+  },
+  {
+    "id": "q11",
+    "question": "Show me a code snippet to implement a binary search in Python",
+    "category": "code",
+    "expectedIntent": "code",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["code", "snippet", "binary", "search", "python"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["def", "mid", "low", "high"]
+  },
+  {
+    "id": "q12",
+    "question": "How to handle exceptions with try catch in TypeScript?",
+    "category": "code",
+    "expectedIntent": "code",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["handle", "exceptions", "try", "catch", "typescript"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["try", "catch", "throw", "error"]
+  },
+  {
+    "id": "q13",
+    "question": "SQL query to find the second highest salary from employees table",
+    "category": "code",
+    "expectedIntent": "code",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["sql", "query", "highest", "salary", "employees"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["select", "distinct", "offset", "limit"]
+  },
+  {
+    "id": "q14",
+    "question": "ന്യൂട്ടന്റെ മൂന്നാം ചലന നിയമം വിശദീകരിക്കുക",
+    "category": "malayalam",
+    "expectedIntent": "explanation",
+    "expectedLanguage": "ml",
+    "expectedKeywords": ["ന്യൂട്ടന്റെ", "മൂന്നാം", "ചലന", "നിയമം", "വിശദീകരിക്കുക"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["പ്രവർത്തനം", "പ്രതിപ്രവർത്തനം"]
+  },
+  {
+    "id": "q15",
+    "question": "ഡാറ്റാ സ്ട്രക്ചറിൽ സ്റ്റാക്ക് എങ്ങനെ പ്രവർത്തിക്കുന്നു?",
+    "category": "malayalam",
+    "expectedIntent": "explanation",
+    "expectedLanguage": "ml",
+    "expectedKeywords": ["ഡാറ്റാ", "സ്ട്രക്ചറിൽ", "സ്റ്റാക്ക്", "പ്രവർത്തിക്കുന്നു"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["lifo", "പുഷ്", "പോപ്പ്"]
+  },
+  {
+    "id": "q16",
+    "question": "മെമ്മറി മാനേജ്മെന്റ് എന്താണ്? അതിന്റെ പ്രധാന ഘടകങ്ങൾ ഏവ?",
+    "category": "malayalam",
+    "expectedIntent": "definition",
+    "expectedLanguage": "ml",
+    "expectedKeywords": ["മെമ്മറി", "മാനേജ്മെന്റ്", "ഘടകങ്ങൾ"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["റാം", "അലോക്കേഷൻ", "മെമ്മറി"]
+  },
+  {
+    "id": "q17",
+    "question": "ഓപ്പറേറ്റിംഗ് സിസ്റ്റത്തിലെ ഡെഡ്‌ലോക്ക് (Deadlock) അവസ്ഥ ലഘൂകരിക്കുന്നതിനുള്ള വഴികൾ എന്തൊക്കെയാണ്?",
+    "category": "malayalam",
+    "expectedIntent": "procedure",
+    "expectedLanguage": "mixed",
+    "expectedKeywords": ["ഓപ്പറേറ്റിംഗ്", "സിസ്റ്റത്തിലെ", "ഡെഡ്‌ലോക്ക്", "deadlock"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["deadlock", "റിസോഴ്സ്", "തടയാൻ"]
+  },
+  {
+    "id": "q18",
+    "question": "What is Photosynthesis?",
+    "category": "definition",
+    "expectedIntent": "definition",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["photosynthesis"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["sunlight", "chlorophyll", "glucose"]
+  },
+  {
+    "id": "q19",
+    "question": "Can you give an example of that in real life?",
+    "category": "followup",
+    "expectedIntent": "explanation",
+    "expectedLanguage": "en",
+    "isFollowUp": true,
+    "conversationHistory": [
+      { "role": "user", "content": "What is Newton's third law of motion?" },
+      { "role": "assistant", "content": "For every action, there is an equal and opposite reaction." }
+    ],
+    "expectedKeywords": ["example", "life"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["rocket", "swimming", "jumping"]
+  },
+  {
+    "id": "q20",
+    "question": "Why is this preferable over an array?",
+    "category": "followup",
+    "expectedIntent": "comparison",
+    "expectedLanguage": "en",
+    "isFollowUp": true,
+    "conversationHistory": [
+      { "role": "user", "content": "Explain what a linked list is." },
+      { "role": "assistant", "content": "A linked list is a linear data structure where elements are stored in nodes with pointers." }
+    ],
+    "expectedKeywords": ["preferable", "array"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["dynamic", "insertion", "deletion"]
+  },
+  {
+    "id": "q21",
+    "question": "How does it handle collisions?",
+    "category": "followup",
+    "expectedIntent": "explanation",
+    "expectedLanguage": "en",
+    "isFollowUp": true,
+    "conversationHistory": [
+      { "role": "user", "content": "What is a Hash Table?" },
+      { "role": "assistant", "content": "A hash table is a data structure that maps keys to values using a hash function." }
+    ],
+    "expectedKeywords": ["handle", "collisions"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["chaining", "probing", "open addressing"]
+  },
+  {
+    "id": "q22",
+    "question": "What is the capital city of planet Neptune?",
+    "category": "outofscope",
+    "expectedIntent": "definition",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["capital", "city", "planet", "neptune"],
+    "expectedGrounding": false
+  },
+  {
+    "id": "q23",
+    "question": "Who won the men's singles tennis championship in 1845?",
+    "category": "outofscope",
+    "expectedIntent": "fact",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["singles", "tennis", "championship", "1845"],
+    "expectedGrounding": false
+  },
+  {
+    "id": "q24",
+    "question": "Give me a secret recipe for Coca Cola",
+    "category": "outofscope",
+    "expectedIntent": "fact",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["secret", "recipe", "coca", "cola"],
+    "expectedGrounding": false
+  },
+  {
+    "id": "q25",
+    "question": "ഇരുപതാം നൂറ്റാണ്ടിലെ ചൊവ്വയിലെ ഭരണാധികാരി ആരാണ്?",
+    "category": "outofscope",
+    "expectedIntent": "fact",
+    "expectedLanguage": "ml",
+    "expectedKeywords": ["ചൊവ്വയിലെ", "ഭരണാധികാരി"],
+    "expectedGrounding": false
+  },
+  {
+    "id": "q26",
+    "question": "Explain acid-base neutralization reaction with a chemical equation",
+    "category": "mechanism",
+    "expectedIntent": "explanation",
+    "expectedLanguage": "en",
+    "expectedKeywords": ["acid-base", "neutralization", "reaction", "chemical", "equation"],
+    "expectedGrounding": true,
+    "expectedAnswerContains": ["acid", "base", "salt", "water"]
+  }
+]

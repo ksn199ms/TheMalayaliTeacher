@@ -1,0 +1,44 @@
+{
+  "name": "the-malayali-teacher",
+  "version": "1.0.0",
+  "description": "TheMalayaliTeacher — Production-Ready AI Student Study & RAG Telegram Bot powered by Google Gemini",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "vitest run --fileParallelism=false",
+    "test:watch": "vitest",
+    "qdrant:download": "node scripts/download-qdrant.js",
+    "qdrant:start": "node scripts/start-qdrant.js",
+    "reindex": "tsx scripts/reindex-documents.ts",
+    "reindex:v4": "tsx scripts/reindex-documents.ts",
+    "eval:rag": "tsx src/rag/evaluation/evaluator.ts",
+    "gemini:status": "tsx scripts/gemini-status.ts"
+  },
+  "dependencies": {
+    "@google/genai": "^2.22.0",
+    "@qdrant/js-client-rest": "^1.13.0",
+    "bullmq": "^6.3.8",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "ioredis": "^6.0.0",
+    "mammoth": "^1.12.3",
+    "mongoose": "^8.9.5",
+    "pdf-parse": "^2.4.5",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "telegraf": "^4.16.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.13.1",
+    "@types/pdf-parse": "^1.1.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

@@ -1,0 +1,83 @@
+# ==========================================
+# TheMalayaliTeacher — .gitignore
+# ==========================================
+
+# Dependencies
+node_modules/
+jspm_packages/
+.pnp
+.pnp.js
+
+# Build Outputs & Compilers
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Environment & Secrets (NEVER commit live credentials)
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.pem
+*.key
+*.cert
+
+# Runtime Data, Storage & Vector Databases
+storage/*
+!storage/.gitkeep
+data/uploads/*
+!data/uploads/.gitkeep
+data/test-storage/*
+!data/test-storage/.gitkeep
+data/qdrant_storage/*
+!data/qdrant_storage/.gitkeep
+snapshots/
+.qdrant-initialized
+
+# Downloaded Binaries
+bin/
+*.exe
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+pino.log
+
+# Testing & Code Coverage
+coverage/
+.nyc_output/
+vitest.config.ts.timestamp*
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE & Code Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+
+# Temporary Files & Caches
+tmp/
+temp/
+*.tmp
+.cache/
