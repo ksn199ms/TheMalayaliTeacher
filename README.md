@@ -161,7 +161,7 @@ Before setting up **TheMalayaliTeacher**, ensure you have:
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/<your-username>/TheMalayaliTeacher.git
+git clone https://github.com/ksn199ms/TheMalayaliTeacher.git
 cd TheMalayaliTeacher
 ```
 
