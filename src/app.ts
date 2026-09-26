@@ -85,20 +85,40 @@ export class App {
 
     // 2. Start Telegram Bot
     if (this.bot) {
-      if (config.TELEGRAM_MODE === 'webhook' && config.TELEGRAM_WEBHOOK_URL) {
-        const fullWebhookUrl = `${config.TELEGRAM_WEBHOOK_URL.replace(/\/$/, '')}/api/telegram-webhook`;
-        logger.info({ webhookUrl: fullWebhookUrl }, 'Registering Telegram bot webhook with Telegram API...');
-        try {
-          await this.bot.telegram.setWebhook(fullWebhookUrl);
-          logger.info('Telegram bot webhook registered successfully!');
-        } catch (webhookErr: any) {
-          logger.error({ error: webhookErr.message }, 'Failed to register Telegram webhook.');
+      if (config.TELEGRAM_MODE === 'webhook') {
+        if (!config.TELEGRAM_WEBHOOK_URL) {
+          logger.error(
+            '⚠️ TELEGRAM_MODE is set to "webhook", but TELEGRAM_WEBHOOK_URL is empty! ' +
+            'Set TELEGRAM_WEBHOOK_URL=https://<your-app>.onrender.com in your Render environment variables.'
+          );
+        } else {
+          const fullWebhookUrl = `${config.TELEGRAM_WEBHOOK_URL.replace(/\/$/, '')}/api/telegram-webhook`;
+          logger.info({ webhookUrl: fullWebhookUrl }, 'Registering Telegram bot webhook with Telegram API...');
+          try {
+            await this.bot.telegram.setWebhook(fullWebhookUrl);
+            logger.info('Telegram bot webhook registered successfully!');
+          } catch (webhookErr: any) {
+            logger.error({ error: webhookErr.message }, 'Failed to register Telegram webhook.');
+          }
         }
       } else {
-        logger.info('Starting Telegram bot polling...');
-        this.bot.launch(() => {
-          logger.info('Telegram bot successfully connected and listening for updates!');
-        });
+        logger.info('Starting Telegram bot polling mode...');
+        try {
+          // Clear any conflicting webhook so Telegram routes updates to polling
+          await this.bot.telegram.deleteWebhook({ drop_pending_updates: false });
+          this.bot
+            .launch(() => {
+              logger.info('Telegram bot successfully connected and listening for updates!');
+            })
+            .catch((launchErr: any) => {
+              logger.error(
+                { error: launchErr.message },
+                'Telegram bot launch error (make sure no other bot instance or npm run dev is running with this token).'
+              );
+            });
+        } catch (pollErr: any) {
+          logger.error({ error: pollErr.message }, 'Failed to start Telegram polling.');
+        }
       }
     } else {
       logger.info('Application running in API-only mode (Telegram polling skipped due to placeholder token).');

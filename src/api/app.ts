@@ -2,16 +2,39 @@ import express, { Express, Request, Response } from 'express';
 import { Telegraf } from 'telegraf';
 import { qdrantService } from '../vector/qdrant.service.js';
 import { config } from '../config/env.js';
+import { createChildLogger } from '../utils/logger.js';
 import mongoose from 'mongoose';
+
+const log = createChildLogger('api');
 
 export function createExpressApp(bot?: Telegraf): Express {
   const app = express();
   app.use(express.json());
 
   // Telegram webhook receiver for cloud hosting
-  if (bot && config.TELEGRAM_MODE === 'webhook') {
+  if (bot) {
     const webhookPath = '/api/telegram-webhook';
-    app.use(webhookPath, bot.webhookCallback(webhookPath));
+
+    // Directly handle POST updates with bot.handleUpdate to prevent Express mount path stripping bugs
+    app.post(webhookPath, async (req: Request, res: Response) => {
+      try {
+        log.info({ updateId: req.body?.update_id }, 'Received Telegram update via webhook.');
+        await bot.handleUpdate(req.body, res);
+      } catch (err: any) {
+        log.error({ error: err.message, stack: err.stack }, 'Error processing Telegram update via webhook.');
+        if (!res.headersSent) {
+          res.sendStatus(500);
+        }
+      }
+    });
+
+    app.get(webhookPath, (_req: Request, res: Response) => {
+      res.json({
+        ok: true,
+        message: 'Telegram webhook receiver is active and listening for POST updates.',
+        mode: config.TELEGRAM_MODE,
+      });
+    });
   }
 
   // Liveness & readiness probe for cloud hosting environments
@@ -20,13 +43,27 @@ export function createExpressApp(bot?: Telegraf): Express {
     const isQdrantOk = await qdrantService.checkHealth().catch(() => false);
     const isHealthy = isMongoOk && isQdrantOk;
 
+    let webhookInfo: any = null;
+    let botUsername: string | null = null;
+    if (bot) {
+      try {
+        const me = await bot.telegram.getMe();
+        botUsername = me.username;
+        webhookInfo = await bot.telegram.getWebhookInfo();
+      } catch (e: any) {
+        webhookInfo = { error: e.message };
+      }
+    }
+
     res.status(isHealthy ? 200 : 503).json({
       status: isHealthy ? 'ok' : 'degraded',
       name: 'മലയാളി ടീച്ചർ (TheMalayaliTeacher)',
       mode: config.TELEGRAM_MODE === 'webhook' ? 'webhook-telegram-bot' : 'polling-telegram-bot',
+      botUsername: botUsername ? `@${botUsername}` : undefined,
       timestamp: new Date().toISOString(),
       database: isMongoOk ? 'ok' : 'down',
       qdrant: isQdrantOk ? 'ok' : 'down',
+      telegramWebhook: webhookInfo,
     });
   };
 
