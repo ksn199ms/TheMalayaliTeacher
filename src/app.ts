@@ -124,6 +124,23 @@ export class App {
       logger.info('Application running in API-only mode (Telegram polling skipped due to placeholder token).');
     }
 
+    // 3. Keep-alive self-ping for Render free tier (prevents container from spinning down after 15m)
+    if (config.TELEGRAM_MODE === 'webhook' && config.TELEGRAM_WEBHOOK_URL) {
+      const pingUrl = `${config.TELEGRAM_WEBHOOK_URL.replace(/\/$/, '')}/health`;
+      const PING_INTERVAL_MS = 8 * 60 * 1000; // Every 8 minutes
+      setInterval(async () => {
+        try {
+          const res = await fetch(pingUrl);
+          if (res.ok) {
+            logger.debug({ pingUrl }, 'Keep-alive self-ping succeeded.');
+          }
+        } catch (pingErr: any) {
+          logger.warn({ error: pingErr.message }, 'Keep-alive self-ping encountered an error.');
+        }
+      }, PING_INTERVAL_MS).unref();
+      logger.info({ pingUrl, intervalMinutes: 8 }, 'Keep-alive self-pinging active to prevent Render sleep.');
+    }
+
     this.isRunning = true;
   }
 
