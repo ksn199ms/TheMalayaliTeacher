@@ -48,6 +48,8 @@ export function createBot(token: string): Telegraf {
   }
 
   const bot = new Telegraf(token);
+  // Disable webhookReply so replies are sent via direct HTTPS calls immediately without timing out webhook sockets
+  bot.telegram.webhookReply = false;
 
   // Global error handler so bot never crashes on unhandled error in a handler
   bot.catch((err: any, ctx) => {

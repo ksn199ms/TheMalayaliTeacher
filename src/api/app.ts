@@ -15,16 +15,18 @@ export function createExpressApp(bot?: Telegraf): Express {
   if (bot) {
     const webhookPath = '/api/telegram-webhook';
 
-    // Directly handle POST updates with bot.handleUpdate to prevent Express mount path stripping bugs
-    app.post(webhookPath, async (req: Request, res: Response) => {
-      try {
-        log.info({ updateId: req.body?.update_id }, 'Received Telegram update via webhook.');
-        await bot.handleUpdate(req.body, res);
-      } catch (err: any) {
-        log.error({ error: err.message, stack: err.stack }, 'Error processing Telegram update via webhook.');
-        if (!res.headersSent) {
-          res.sendStatus(500);
-        }
+    // Directly handle POST updates: immediately acknowledge 200 OK to Telegram so it never times out
+    app.post(webhookPath, (req: Request, res: Response) => {
+      // 1. Immediately acknowledge Telegram to prevent 'Read timeout expired'
+      res.status(200).send('OK');
+
+      // 2. Process update asynchronously in background
+      if (req.body && typeof req.body === 'object') {
+        const updateId = req.body?.update_id;
+        log.info({ updateId }, 'Received Telegram update via webhook, processing asynchronously.');
+        bot.handleUpdate(req.body).catch((err: any) => {
+          log.error({ error: err.message, stack: err.stack, updateId }, 'Error processing Telegram update in background.');
+        });
       }
     });
 
