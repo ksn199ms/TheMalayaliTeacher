@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express, { Express, Request, Response } from 'express';
 import { Telegraf } from 'telegraf';
 import { qdrantService } from '../vector/qdrant.service.js';
@@ -10,6 +12,12 @@ const log = createChildLogger('api');
 export function createExpressApp(bot?: Telegraf): Express {
   const app = express();
   app.use(express.json());
+
+  // Serve public directory statically (e.g. /public/starter.jpg)
+  const rootPublic = path.resolve(process.cwd(), 'public');
+  const modulePublic = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public');
+  app.use('/public', express.static(rootPublic));
+  app.use('/public', express.static(modulePublic));
 
   // Telegram webhook receiver for cloud hosting
   if (bot) {
