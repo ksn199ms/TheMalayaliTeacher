@@ -30,7 +30,10 @@ export class QdrantService {
   private collectionName: string;
 
   constructor(url: string = config.QDRANT_URL, collectionName: string = config.QDRANT_COLLECTION) {
-    this.client = new QdrantClient({ url });
+    this.client = new QdrantClient({
+      url,
+      ...(config.QDRANT_API_KEY ? { apiKey: config.QDRANT_API_KEY } : {}),
+    });
     this.collectionName = collectionName;
   }
 
@@ -47,6 +50,10 @@ export class QdrantService {
    */
   public async checkHealth(): Promise<boolean> {
     try {
+      if (config.QDRANT_API_KEY) {
+        await this.client.getCollections();
+        return true;
+      }
       // Test health endpoint
       const res = await fetch(`${config.QDRANT_URL}/healthz`);
       return res.ok;

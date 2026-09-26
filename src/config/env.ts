@@ -36,6 +36,7 @@ export const envSchema = z.object({
 
   // Qdrant Vector Database
   QDRANT_URL: z.string().url().default('http://localhost:6333'),
+  QDRANT_API_KEY: z.string().optional().default(''),
   QDRANT_COLLECTION: z.string().min(1).default('student_documents'),
 
   // RAG & Chunking

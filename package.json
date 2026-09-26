@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "TheMalayaliTeacher — Production-Ready AI Student Study & RAG Telegram Bot powered by Google Gemini",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
