@@ -14,6 +14,7 @@ import { AIFactory } from '../../ai/ai.factory.js';
 import { SYSTEM_PROMPT, buildRAGPrompt } from '../prompts.js';
 import { ICitation } from '../../database/models/Message.js';
 import { RetrievedChunk } from '../retriever.js';
+import { geminiDeduplicator } from '../../ai/cache/GeminiDeduplicator.js';
 import { config } from '../../config/env.js';
 import { createChildLogger } from '../../utils/logger.js';
 
@@ -77,6 +78,35 @@ export class RAGPipeline {
 
     // 1. Query Normalization
     const normalized = normalizeQuery(question);
+
+    // Check user-scoped short-term cache for duplicate identical queries (zero API cost)
+    if (conversationHistory.length === 0) {
+      const cached = geminiDeduplicator.getCachedResponse(userId, normalized, documentIds);
+      if (cached) {
+        log.info({ userId, question: normalized }, 'Returning cached RAG answer (zero Gemini API calls used).');
+        return {
+          answer: cached,
+          rawAnswer: cached,
+          citations: [],
+          retrievedChunks: [],
+          grounding: {
+            isGrounded: true,
+            score: 1.0,
+            groundedClaimsCount: 1,
+            ungroundedClaimsCount: 0,
+            citationIds: [],
+          },
+          metadata: {
+            normalizedQuery: normalized,
+            rewrittenQuery: undefined,
+            queryLanguage: 'en',
+            candidateCount: 0,
+            finalChunkCount: 0,
+            executionTimeMs: Date.now() - startTime,
+          },
+        };
+      }
+    }
 
     // 2. Query Analysis
     const analyzed: AnalyzedQuery = analyzeQuery(normalized);
@@ -167,11 +197,12 @@ export class RAGPipeline {
       content: buildRAGPrompt(contextText, question),
     });
 
-    // 10. Generation via Gemini 3.8 Flash
+    // 10. Generation via Gemini 3.5 Flash-Lite (Fastest)
     const rawAnswer = await ai.generateText({
       systemPrompt: SYSTEM_PROMPT,
       messages,
       temperature: 0.2,
+      maxTokens: 1024,
       requestType: 'answer',
       userId,
     });
@@ -198,6 +229,11 @@ export class RAGPipeline {
 
     if (validatedCitations.length > 0 && !finalAnswerText.includes('📚 *Sources:*')) {
       finalAnswerText += citationBuilder.formatTelegramCitations(validatedCitations);
+    }
+
+    // Store in short-term cache for zero-overhead repeat queries
+    if (conversationHistory.length === 0 && finalAnswerText) {
+      geminiDeduplicator.setCachedResponse(userId, normalized, finalAnswerText, documentIds);
     }
 
     const executionTimeMs = Date.now() - startTime;

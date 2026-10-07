@@ -17,8 +17,8 @@ export class GeminiOcrService {
 
   constructor(apiKey: string = config.GEMINI_API_KEY, model: string = config.GEMINI_MODEL) {
     this.ai = new GoogleGenAI({ apiKey: apiKey || 'unconfigured' });
-    if (!model || model === 'gemini-2.5-flash' || model === 'gemini-3.6-flash') {
-      this.model = 'gemini-3.5-flash';
+    if (!model || model === 'gemini-2.5-flash' || model === 'gemini-3.6-flash' || model === 'gemini-3.8-flash') {
+      this.model = config.GEMINI_MODEL || 'gemini-3.5-flash-lite';
     } else {
       this.model = model;
     }

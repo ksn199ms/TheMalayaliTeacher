@@ -53,6 +53,8 @@ export const START_MESSAGE_HTML = `👋 <b>Welcome to മലയാളി ടീ�
 
 Use the buttons below or upload a document to get started!`;
 
+export const START_MESSAGE = START_MESSAGE_HTML;
+
 export async function handleStart(ctx: Context): Promise<void> {
   const from = ctx.from;
   if (!from) return;

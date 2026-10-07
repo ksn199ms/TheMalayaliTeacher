@@ -8,7 +8,7 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-v20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-3.8%20Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com/)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-3.5%20Flash--Lite-4285F4?logo=google&logoColor=white)](https://aistudio.google.com/)
 [![Qdrant](https://img.shields.io/badge/Vector%20DB-Qdrant-DC2626?logo=qdrant&logoColor=white)](https://qdrant.tech/)
 [![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Telegraf](https://img.shields.io/badge/Telegram%20Bot-Telegraf%20v4-24A1DE?logo=telegram&logoColor=white)](https://telegraf.js.org/)
@@ -28,7 +28,7 @@ Students simply upload their lecture notes, textbooks, slides, or handwritten pa
 ### ✨ Highlights
 
 - **🥥 Bilingual Malayalam & English Intelligence**: Native Unicode normalization (NFC) preserving Malayalam glyphs, cross-lingual retrieval, and culturally grounded Malayalam explanations.
-- **⚡ Google Gemini 3.8 Flash Core**: High-speed reasoning powered by Google's `gemini-3.8-flash` combined with 768-dimensional `gemini-embedding-001` embeddings.
+- **⚡ Google Gemini 3.5 Flash Core**: Ultra-fast, high-efficiency reasoning powered by Google's `gemini-3.5-flash-lite` (with automatic fallback to `gemini-3.5-flash`) combined with 768-dimensional `gemini-embedding-001` embeddings.
 - **🛡️ Enterprise Gemini Quota & Circuit Breaker**: Production-hardened with zero-retry circuit breakers on daily quota exhaustion (`RPD`), concurrency queues, jittered exponential backoff, and user message sanitization.
 - **🔍 Advanced V4 Hybrid RAG Pipeline**: Combines dense vector similarity with keyword BM25 scoring, multi-factor local reranking, token deduplication, and hallucination guardrails.
 - **📚 Interactive Telegram Study Hub**: In-chat MCQ quizzes with instant scoring and explanations, spaced-repetition flashcards with flip navigation, topic simplification, and exam keypoints.
@@ -105,7 +105,7 @@ flowchart TD
 | **HTTP API** | Express v5 + Helmet | REST endpoints, health probes, secure headers |
 | **Vector Database** | Qdrant | Cosine distance similarity, 768 dimensions, payload filtering |
 | **Metadata Database** | MongoDB + Mongoose | Users, document metadata, active study sessions, telemetry |
-| **AI LLM** | Google Gemini 3.8 Flash | `gemini-3.8-flash` via `@google/genai` SDK |
+| **AI LLM** | Google Gemini 3.5 Flash-Lite | `gemini-3.5-flash-lite` (fastest & most efficient) via `@google/genai` SDK |
 | **Embeddings** | Gemini Embeddings | `gemini-embedding-001` (768-dimensional vectors) |
 | **Job Queue** | BullMQ / Redis | Background document processing (with seamless in-memory fallback) |
 | **Document Parsers** | `pdf-parse`, `mammoth` | PDF page preservation, DOCX formatting, TXT, Markdown, Gemini OCR |
@@ -189,7 +189,7 @@ TELEGRAM_BOT_TOKEN=123456789:ABCdefGhIJKlmNoPQRstUVwxyz
 
 # Google Gemini API (from https://aistudio.google.com/)
 GEMINI_API_KEY=AIzaSy...
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.5-flash-lite
 GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 
 # Qdrant Vector Database (Local binary)

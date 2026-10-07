@@ -14,12 +14,20 @@ export class GeminiProvider implements AIProvider {
 
   constructor(apiKey: string = config.GEMINI_API_KEY, model: string = config.GEMINI_MODEL) {
     this.apiKey = apiKey;
-    if (!model || model === 'gemini-2.5-flash' || model === 'gemini-3.6-flash') {
-      this.model = 'gemini-3.8-flash';
-    } else {
-      this.model = model;
-    }
+    this.model = this.resolveModel(model);
     this.ai = new GoogleGenAI({ apiKey: this.apiKey || 'unconfigured' });
+  }
+
+  /**
+   * Resolves the fastest efficient Gemini 3.5 model name.
+   * Defaults to gemini-3.5-flash-lite (fastest, lowest latency, highest limits).
+   */
+  private resolveModel(modelName?: string): string {
+    const candidate = modelName?.trim();
+    if (!candidate || candidate === 'gemini-2.5-flash' || candidate === 'gemini-3.6-flash' || candidate === 'gemini-3.8-flash') {
+      return config.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+    }
+    return candidate;
   }
 
   private validateKey(): void {
@@ -61,9 +69,35 @@ export class GeminiProvider implements AIProvider {
     return contents;
   }
 
+  /**
+   * Calculates smart token bounds based on request type to avoid exceeding quota limits.
+   */
+  private getOptimalMaxTokens(options: GenerateTextOptions): number {
+    if (options.maxTokens) return options.maxTokens;
+    switch (options.requestType) {
+      case 'summary':
+        return 2048;
+      case 'quiz':
+      case 'flashcards':
+        return 1500;
+      case 'explain':
+      case 'simplify':
+        return 1024;
+      case 'ocr':
+        return 4096;
+      case 'answer':
+      default:
+        return 1024;
+    }
+  }
+
   public async generateText(options: GenerateTextOptions): Promise<string> {
     this.validateKey();
-    const model = (!this.model || this.model.includes('gemini-2.5-flash') || this.model.includes('gemini-3.6-flash')) ? 'gemini-3.8-flash' : this.model;
+    const primaryModel = this.resolveModel(this.model);
+    const fallbackModel = primaryModel.includes('flash-lite')
+      ? 'gemini-3.5-flash'
+      : 'gemini-3.5-flash-lite';
+    const maxOutputTokens = this.getOptimalMaxTokens(options);
 
     const context = options.requestContext || geminiRequestManager.createRequestContext(
       options.userId || 'system',
@@ -72,25 +106,57 @@ export class GeminiProvider implements AIProvider {
 
     try {
       return await geminiRequestManager.execute(context, async () => {
-        log.debug({ model, operation: context.operation }, 'Calling Gemini generateContent...');
+        let activeModel = primaryModel;
+        log.debug({ model: activeModel, operation: context.operation }, 'Calling Gemini generateContent...');
         const contents = this.formatContents(options);
 
         const systemInstruction = options.systemPrompt
           ? { parts: [{ text: options.systemPrompt }] }
           : undefined;
 
-        const response = await this.ai.models.generateContent({
-          model,
-          contents,
-          config: {
-            systemInstruction,
-            temperature: options.temperature ?? 0.2,
-            maxOutputTokens: options.maxTokens,
-            responseMimeType: options.responseFormat === 'json' ? 'application/json' : undefined,
-          },
-        });
+        try {
+          const response = await this.ai.models.generateContent({
+            model: activeModel,
+            contents,
+            config: {
+              systemInstruction,
+              temperature: options.temperature ?? 0.2,
+              maxOutputTokens,
+              responseMimeType: options.responseFormat === 'json' ? 'application/json' : undefined,
+            },
+          });
 
-        return response.text || '';
+          return response.text || '';
+        } catch (firstErr: any) {
+          // If first model hits a quota or rate-limit error, attempt seamless fallback to sibling 3.5 model
+          const isRateLimit =
+            firstErr?.status === 429 ||
+            firstErr?.statusCode === 429 ||
+            (typeof firstErr?.message === 'string' &&
+              (firstErr.message.includes('429') ||
+                firstErr.message.includes('RESOURCE_EXHAUSTED') ||
+                firstErr.message.includes('Quota exceeded')));
+
+          if (isRateLimit && fallbackModel && fallbackModel !== activeModel) {
+            log.warn(
+              { failedModel: activeModel, fallbackModel, error: firstErr.message },
+              'Gemini 3.5 model rate limit reached. Seamlessly attempting fallback 3.5 model...'
+            );
+            activeModel = fallbackModel;
+            const response = await this.ai.models.generateContent({
+              model: activeModel,
+              contents,
+              config: {
+                systemInstruction,
+                temperature: options.temperature ?? 0.2,
+                maxOutputTokens,
+                responseMimeType: options.responseFormat === 'json' ? 'application/json' : undefined,
+              },
+            });
+            return response.text || '';
+          }
+          throw firstErr;
+        }
       });
     } catch (error: any) {
       log.error({ error: error.message }, 'Gemini generateText failed.');
@@ -107,10 +173,11 @@ export class GeminiProvider implements AIProvider {
 
   public async *streamText(options: GenerateTextOptions): AsyncIterable<string> {
     this.validateKey();
-    const model = (!this.model || this.model.includes('gemini-2.5-flash') || this.model.includes('gemini-3.6-flash')) ? 'gemini-3.8-flash' : this.model;
+    const primaryModel = this.resolveModel(this.model);
+    const maxOutputTokens = this.getOptimalMaxTokens(options);
 
     try {
-      log.debug({ model }, 'Calling Gemini generateContentStream...');
+      log.debug({ model: primaryModel }, 'Calling Gemini generateContentStream...');
       const contents = this.formatContents(options);
 
       const systemInstruction = options.systemPrompt
@@ -118,12 +185,12 @@ export class GeminiProvider implements AIProvider {
         : undefined;
 
       const stream = await this.ai.models.generateContentStream({
-        model,
+        model: primaryModel,
         contents,
         config: {
           systemInstruction,
           temperature: options.temperature ?? 0.2,
-          maxOutputTokens: options.maxTokens,
+          maxOutputTokens,
         },
       });
 

@@ -1,13 +1,13 @@
 # 🤖 TheMalayaliTeacher — Gemini Integration & Quota Management
 
-TheMalayaliTeacher is built exclusively on Google Gemini (`gemini-3.8-flash` and `gemini-embedding-001`).
+TheMalayaliTeacher is built exclusively on Google Gemini (`gemini-3.5-flash-lite` and `gemini-embedding-001`).
 
 ---
 
 ## 1. Centralized Gemini Client
 
 All Gemini calls route through `GeminiService`:
-- **Model Selection**: Defaults to `gemini-3.8-flash` for high throughput, fast response times, and superior context comprehension.
+- **Model Selection**: Defaults to `gemini-3.5-flash-lite` for ultra-fast throughput, ~1s latency, lowest token consumption, and seamless fallback to `gemini-3.5-flash`.
 - **Embeddings**: `gemini-embedding-001` producing 768-dimensional normalized vectors.
 
 ---

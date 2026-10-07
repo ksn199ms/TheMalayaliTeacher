@@ -31,7 +31,7 @@ export const envSchema = z.object({
 
   // Google Gemini Configuration
   GEMINI_API_KEY: z.string().default(''),
-  GEMINI_MODEL: z.string().default('gemini-3.8-flash'),
+  GEMINI_MODEL: z.string().default('gemini-3.5-flash-lite'),
   GEMINI_EMBEDDING_MODEL: z.string().default('gemini-embedding-001'),
 
   // Qdrant Vector Database

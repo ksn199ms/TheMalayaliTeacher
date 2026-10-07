@@ -83,7 +83,7 @@ QDRANT_COLLECTION=student_documents
 AI_PROVIDER=gemini
 EMBEDDING_PROVIDER=gemini
 GEMINI_API_KEY=AIzaSy...
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.5-flash-lite
 GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 
 # Telegram Bot

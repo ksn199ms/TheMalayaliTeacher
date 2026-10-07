@@ -240,6 +240,14 @@ export class JobQueue {
         error: undefined,
       });
 
+      // Increment user daily upload quota
+      await quotaService.incrementUploadCount(userId);
+
+      await this.notifyTelegram(
+        notifier,
+        `✅ <b>${escapeHtml(fileName)}</b> is ready!\n\nYou can now ask questions about it or use /study to test yourself.`
+      );
+
       await ProcessingJob.findByIdAndUpdate(jobId, {
         status: 'completed',
         stage: 'Ready',
@@ -249,14 +257,6 @@ export class JobQueue {
           pageCount,
         },
       });
-
-      // Increment user daily upload quota
-      await quotaService.incrementUploadCount(userId);
-
-      await this.notifyTelegram(
-        notifier,
-        `✅ <b>${escapeHtml(fileName)}</b> is ready!\n\nYou can now ask questions about it or use /study to test yourself.`
-      );
 
       log.info({ jobId, documentId, chunks: allChunks.length }, 'Document successfully indexed in background.');
     } catch (error: any) {
