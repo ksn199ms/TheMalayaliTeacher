@@ -47,7 +47,9 @@ export function createBot(token: string): Telegraf {
     throw new Error('Telegram bot token is required to initialize bot.');
   }
 
-  const bot = new Telegraf(token);
+  const bot = new Telegraf(token, {
+    handlerTimeout: 120_000,
+  });
   // Disable webhookReply so replies are sent via direct HTTPS calls immediately without timing out webhook sockets
   bot.telegram.webhookReply = false;
 
@@ -55,7 +57,12 @@ export function createBot(token: string): Telegraf {
   bot.catch((err: any, ctx) => {
     log.error({ err: err.message, updateType: ctx.updateType }, 'Unhandled error in Telegram update handler.');
     try {
-      ctx.reply('⚠️ An unexpected error occurred. Please try again later.');
+      const errMsg = err?.message || '';
+      if (errMsg.toLowerCase().includes('timed out')) {
+        ctx.reply('⏳ The operation took longer than expected to process. Please try again in a moment.');
+      } else {
+        ctx.reply('⚠️ An unexpected error occurred. Please try again later.');
+      }
     } catch (e: any) {
       log.error({ error: e.message }, 'Failed to send error message to user.');
     }

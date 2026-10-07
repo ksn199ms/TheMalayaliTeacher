@@ -7,6 +7,7 @@ import { GeminiErrorClassifier } from './errors/GeminiErrorClassifier.js';
 import { GeminiAPIError, GeminiErrorInfo } from './errors/GeminiError.js';
 import { recordGeminiUsageToDB } from '../database/models/GeminiUsage.js';
 import { config } from '../config/env.js';
+import { withTimeout } from '../utils/timeout.js';
 import { createChildLogger } from '../utils/logger.js';
 
 const log = createChildLogger('gemini.request.manager');
@@ -108,7 +109,11 @@ export class GeminiRequestManager {
         operation,
         async (attempt) => {
           attemptCount = attempt;
-          return await apiAction(attempt);
+          return await withTimeout(
+            apiAction(attempt),
+            25_000,
+            `Gemini API request timed out after 25s for operation ${operation}.`
+          );
         },
         {
           onRetry: (_attempt, _delayMs, _errInfo) => {

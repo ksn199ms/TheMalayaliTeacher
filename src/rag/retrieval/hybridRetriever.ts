@@ -47,6 +47,10 @@ export class HybridRetriever {
     const { userId, documentIds, candidatePoolSize = config.RETRIEVAL_CANDIDATES, scoreThreshold } = options;
 
     const validatedScope = await buildRetrievalFilter(userId, documentIds);
+    if (validatedScope.hasDocuments === false) {
+      log.debug({ userId: validatedScope.userId }, 'User has no ready documents; skipping vector search.');
+      return [];
+    }
 
     const validQueries = queries
       .map((q) => q.trim())

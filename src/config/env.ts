@@ -76,9 +76,9 @@ export const envSchema = z.object({
   // V4.1 Gemini Quota Management, Retries & Cost Optimization
   GEMINI_MAX_RETRIES: z.coerce.number().int().nonnegative().default(3),
   GEMINI_INITIAL_RETRY_DELAY_MS: z.coerce.number().int().positive().default(1000),
-  GEMINI_MAX_RETRY_DELAY_MS: z.coerce.number().int().positive().default(30000),
+  GEMINI_MAX_RETRY_DELAY_MS: z.coerce.number().int().positive().default(10000),
   GEMINI_RETRY_JITTER_MS: z.coerce.number().int().nonnegative().default(500),
-  GEMINI_MAX_RETRY_TIME_MS: z.coerce.number().int().positive().default(60000),
+  GEMINI_MAX_RETRY_TIME_MS: z.coerce.number().int().positive().default(25000),
   GEMINI_MAX_CONCURRENT_REQUESTS: z.coerce.number().int().positive().default(2),
   GEMINI_MAX_QUEUE_SIZE: z.coerce.number().int().positive().default(20),
   MAX_GEMINI_CALLS_PER_USER_REQUEST: z.coerce.number().int().positive().default(3),

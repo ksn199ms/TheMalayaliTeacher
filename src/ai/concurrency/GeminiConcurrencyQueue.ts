@@ -49,8 +49,25 @@ export class GeminiConcurrencyQueue {
       'Gemini concurrency limit reached; queuing request...'
     );
 
-    await new Promise<void>((resolve) => {
-      this.queue.push(resolve);
+    await new Promise<void>((resolve, reject) => {
+      let timer: NodeJS.Timeout | null = null;
+      const callback = () => {
+        if (timer) {
+          clearTimeout(timer);
+          timer = null;
+        }
+        resolve();
+      };
+
+      timer = setTimeout(() => {
+        const idx = this.queue.indexOf(callback);
+        if (idx !== -1) {
+          this.queue.splice(idx, 1);
+        }
+        reject(new GeminiQueueOverflowError('Timed out waiting for an available AI worker slot. Please try again.'));
+      }, 15_000);
+
+      this.queue.push(callback);
     });
 
     this.activeCount++;

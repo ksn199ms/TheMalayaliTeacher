@@ -18,6 +18,11 @@ export function mapGeminiErrorToUserMessage(error: unknown): string {
     return '⏳ Your request is already being processed. Please wait a moment!';
   }
 
+  // Check if timeout
+  if (errStr.toLowerCase().includes('timed out') || errStr.toLowerCase().includes('timeout')) {
+    return '⏳ The request took longer than expected to process. Please try asking again in a moment.';
+  }
+
   // Check if request budget exceeded
   if (errStr.includes('budget') || errStr.includes('REQUEST_BUDGET_EXCEEDED')) {
     return '⚠️ The maximum AI operation budget for this request was reached. Please try a simpler or more specific query.';

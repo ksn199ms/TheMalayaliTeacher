@@ -6,6 +6,7 @@ import { editOrSendTelegramResponse, escapeHtml } from '../../utils/telegram.js'
 import { quotaService } from '../../modules/users/quota.service.js';
 import { geminiDeduplicator } from '../../ai/cache/GeminiDeduplicator.js';
 import { mapGeminiErrorToUserMessage } from '../utils/geminiErrorMapper.js';
+import { withTimeout } from '../../utils/timeout.js';
 import { createChildLogger } from '../../utils/logger.js';
 
 const log = createChildLogger('simplify.handler');
@@ -72,7 +73,11 @@ export async function handleSimplifyCommand(ctx: Context): Promise<void> {
   ctx.sendChatAction('typing').catch(() => {});
 
   try {
-    const result = await simplifyService.simplifyConcept(userId, concept);
+    const result = await withTimeout(
+      simplifyService.simplifyConcept(userId, concept),
+      45_000,
+      'Generating simplification took longer than expected. Please try again.'
+    );
     await quotaService.incrementStudyGenerationCount(userId);
 
     await editOrSendTelegramResponse(ctx, statusMsg?.message_id, result.simplifiedText);

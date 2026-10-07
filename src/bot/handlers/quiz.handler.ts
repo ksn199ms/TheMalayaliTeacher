@@ -6,6 +6,7 @@ import { studySessionService } from '../../study/StudySessionService.js';
 import { studyRateLimiter } from '../../utils/rate-limiter.js';
 import { geminiDeduplicator } from '../../ai/cache/GeminiDeduplicator.js';
 import { mapGeminiErrorToUserMessage } from '../utils/geminiErrorMapper.js';
+import { withTimeout } from '../../utils/timeout.js';
 import { quotaService } from '../../modules/users/quota.service.js';
 import { sendTelegramResponse, formatToTelegramHtml, escapeHtml } from '../../utils/telegram.js';
 import { createChildLogger } from '../../utils/logger.js';
@@ -116,7 +117,11 @@ export async function handleQuizGenerateAction(ctx: Context): Promise<void> {
   await ctx.sendChatAction('typing');
 
   try {
-    const session = await quizService.generateQuiz(userId, documentId, count);
+    const session = await withTimeout(
+      quizService.generateQuiz(userId, documentId, count),
+      45_000,
+      'Generating quiz took longer than expected. Please try again.'
+    );
     await quotaService.incrementStudyGenerationCount(userId);
 
     // Render Question 1

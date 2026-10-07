@@ -6,6 +6,7 @@ const log = createChildLogger('retrieval.filters');
 export interface ValidatedRetrievalScope {
   userId: string;
   documentIds?: string[];
+  hasDocuments?: boolean;
 }
 
 /**
@@ -22,20 +23,34 @@ export async function buildRetrievalFilter(
 
   const cleanUserId = userId.trim();
 
-  if (!requestedDocIds || requestedDocIds.length === 0) {
-    return { userId: cleanUserId };
-  }
-
-  // Filter out any invalid / empty IDs
-  const candidateIds = requestedDocIds
-    .filter((id) => typeof id === 'string' && id.trim().length > 0)
-    .map((id) => id.trim());
-
-  if (candidateIds.length === 0) {
-    return { userId: cleanUserId };
-  }
-
   try {
+    if (!requestedDocIds || requestedDocIds.length === 0) {
+      const readyDocCount = await DocumentModel.countDocuments({
+        userId: cleanUserId,
+        status: 'ready',
+      });
+      return {
+        userId: cleanUserId,
+        hasDocuments: readyDocCount > 0,
+      };
+    }
+
+    // Filter out any invalid / empty IDs
+    const candidateIds = requestedDocIds
+      .filter((id) => typeof id === 'string' && id.trim().length > 0)
+      .map((id) => id.trim());
+
+    if (candidateIds.length === 0) {
+      const readyDocCount = await DocumentModel.countDocuments({
+        userId: cleanUserId,
+        status: 'ready',
+      });
+      return {
+        userId: cleanUserId,
+        hasDocuments: readyDocCount > 0,
+      };
+    }
+
     // Verify in MongoDB that these documents belong to cleanUserId
     const ownedDocs = await DocumentModel.find(
       { _id: { $in: candidateIds }, userId: cleanUserId },
@@ -49,16 +64,25 @@ export async function buildRetrievalFilter(
         { userId: cleanUserId, candidateIds },
         'None of the requested documentIds belong to user; searching all user documents instead.'
       );
-      return { userId: cleanUserId };
+      const readyDocCount = await DocumentModel.countDocuments({
+        userId: cleanUserId,
+        status: 'ready',
+      });
+      return {
+        userId: cleanUserId,
+        hasDocuments: readyDocCount > 0,
+      };
     }
 
     return {
       userId: cleanUserId,
       documentIds: verifiedIds,
+      hasDocuments: verifiedIds.length > 0,
     };
   } catch (error: any) {
     log.error({ error: error.message, userId: cleanUserId }, 'Failed to verify document ownership in MongoDB.');
-    // Fail safe: isolate strictly by userId
-    return { userId: cleanUserId };
+    // Fail safe: isolate strictly by userId and allow search
+    return { userId: cleanUserId, hasDocuments: true };
   }
 }
+

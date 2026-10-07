@@ -7,6 +7,7 @@ import { sendTelegramResponse, escapeHtml } from '../../utils/telegram.js';
 import { quotaService } from '../../modules/users/quota.service.js';
 import { geminiDeduplicator } from '../../ai/cache/GeminiDeduplicator.js';
 import { mapGeminiErrorToUserMessage } from '../utils/geminiErrorMapper.js';
+import { withTimeout } from '../../utils/timeout.js';
 import { createChildLogger } from '../../utils/logger.js';
 
 const log = createChildLogger('summarize.handler');
@@ -72,7 +73,11 @@ export async function handleSummarizeDocSelect(ctx: Context, documentId: string)
   await ctx.sendChatAction('typing');
 
   try {
-    const result = await summaryService.summarizeDocument(userId, documentId);
+    const result = await withTimeout(
+      summaryService.summarizeDocument(userId, documentId),
+      45_000,
+      'Generating summary took longer than expected. Please try again.'
+    );
     await quotaService.incrementStudyGenerationCount(userId);
 
     await sendTelegramResponse(ctx, result.summary);

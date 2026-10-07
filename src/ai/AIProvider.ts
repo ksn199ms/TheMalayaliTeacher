@@ -11,7 +11,7 @@ export interface GenerateTextOptions {
   maxTokens?: number;
   responseLanguage?: string;
   responseFormat?: 'text' | 'json';
-  requestType?: 'answer' | 'summary' | 'explain' | 'keypoints' | 'simplify' | 'quiz' | 'flashcards' | 'query-expansion' | 'reranking' | 'grounding';
+  requestType?: 'answer' | 'summary' | 'explain' | 'keypoints' | 'simplify' | 'quiz' | 'flashcards' | 'query-expansion' | 'reranking' | 'grounding' | 'ocr' | 'embedding';
   userId?: string;
   requestContext?: any;
 }

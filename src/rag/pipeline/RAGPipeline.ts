@@ -92,9 +92,7 @@ export class RAGPipeline {
           grounding: {
             isGrounded: true,
             score: 1.0,
-            groundedClaimsCount: 1,
-            ungroundedClaimsCount: 0,
-            citationIds: [],
+            unsupportedClaims: [],
           },
           metadata: {
             normalizedQuery: normalized,

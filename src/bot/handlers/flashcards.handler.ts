@@ -6,6 +6,7 @@ import { studySessionService } from '../../study/StudySessionService.js';
 import { studyRateLimiter } from '../../utils/rate-limiter.js';
 import { geminiDeduplicator } from '../../ai/cache/GeminiDeduplicator.js';
 import { mapGeminiErrorToUserMessage } from '../utils/geminiErrorMapper.js';
+import { withTimeout } from '../../utils/timeout.js';
 import { quotaService } from '../../modules/users/quota.service.js';
 import { formatToTelegramHtml, escapeHtml } from '../../utils/telegram.js';
 import { createChildLogger } from '../../utils/logger.js';
@@ -76,7 +77,11 @@ export async function handleFlashcardsDocSelect(ctx: Context, documentId: string
   await ctx.sendChatAction('typing');
 
   try {
-    const session = await flashcardService.generateFlashcards(userId, documentId, 8);
+    const session = await withTimeout(
+      flashcardService.generateFlashcards(userId, documentId, 8),
+      45_000,
+      'Generating flashcards took longer than expected. Please try again.'
+    );
     await quotaService.incrementStudyGenerationCount(userId);
 
     const { text, keyboard } = flashcardService.renderFlashcard(session);

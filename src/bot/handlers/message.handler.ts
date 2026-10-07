@@ -9,6 +9,7 @@ import { questionRateLimiter } from '../../utils/rate-limiter.js';
 import { editOrSendTelegramResponse, escapeHtml } from '../../utils/telegram.js';
 import { geminiDeduplicator } from '../../ai/cache/GeminiDeduplicator.js';
 import { mapGeminiErrorToUserMessage } from '../utils/geminiErrorMapper.js';
+import { withTimeout } from '../../utils/timeout.js';
 import { createChildLogger } from '../../utils/logger.js';
 
 const log = createChildLogger('message.handler');
@@ -106,12 +107,16 @@ export async function handleTextMessage(ctx: Context): Promise<void> {
     // Save user message to database
     await chatService.addMessage(chat._id.toString(), 'user', text);
 
-    // Run RAG pipeline
-    const ragResult = await ragService.answerQuestion({
-      userId,
-      question: text,
-      conversationHistory: history.map((h) => ({ role: h.role, content: h.content })),
-    });
+    // Run RAG pipeline with 45s safety timeout
+    const ragResult = await withTimeout(
+      ragService.answerQuestion({
+        userId,
+        question: text,
+        conversationHistory: history.map((h) => ({ role: h.role, content: h.content })),
+      }),
+      45_000,
+      'Generating your answer took longer than expected. Please try asking again.'
+    );
 
     // Save assistant reply with citations
     await chatService.addMessage(

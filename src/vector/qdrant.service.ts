@@ -1,6 +1,7 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { config } from '../config/env.js';
 import { createChildLogger } from '../utils/logger.js';
+import { withTimeout } from '../utils/timeout.js';
 
 const log = createChildLogger('qdrant');
 
@@ -33,6 +34,7 @@ export class QdrantService {
     this.client = new QdrantClient({
       url,
       ...(config.QDRANT_API_KEY ? { apiKey: config.QDRANT_API_KEY } : {}),
+      timeout: 5000, // 5s timeout to prevent hanging when Qdrant is unreachable
     });
     this.collectionName = collectionName;
   }
@@ -51,14 +53,16 @@ export class QdrantService {
   public async checkHealth(): Promise<boolean> {
     try {
       if (config.QDRANT_API_KEY) {
-        await this.client.getCollections();
+        await withTimeout(this.client.getCollections(), 3000, 'Qdrant getCollections timed out');
         return true;
       }
-      // Test health endpoint
-      const res = await fetch(`${config.QDRANT_URL}/healthz`);
+      // Test health endpoint with 3s timeout
+      const res = await fetch(`${config.QDRANT_URL}/healthz`, {
+        signal: AbortSignal.timeout(3000),
+      });
       return res.ok;
     } catch (error: any) {
-      log.error({ error: error.message }, 'Qdrant health check failed.');
+      log.warn({ error: error.message }, 'Qdrant health check failed or timed out.');
       return false;
     }
   }
@@ -127,10 +131,14 @@ export class QdrantService {
     }>
   ): Promise<void> {
     try {
-      await this.client.upsert(this.collectionName, {
-        wait: true,
-        points,
-      });
+      await withTimeout(
+        this.client.upsert(this.collectionName, {
+          wait: true,
+          points,
+        }),
+        10000,
+        'Qdrant upsert timed out after 10000ms'
+      );
       log.debug({ count: points.length }, 'Upserted vectors into Qdrant.');
     } catch (error: any) {
       log.error({ error: error.message, count: points.length }, 'Failed to upsert vectors into Qdrant.');
@@ -151,36 +159,50 @@ export class QdrantService {
       throw new Error('Security violation: userId is required for vector search isolation.');
     }
 
-    const mustFilters: any[] = [
-      {
-        key: 'userId',
-        match: { value: userId },
-      },
-    ];
+    try {
+      const mustFilters: any[] = [
+        {
+          key: 'userId',
+          match: { value: userId },
+        },
+      ];
 
-    if (documentIds && documentIds.length > 0) {
-      mustFilters.push({
-        key: 'documentId',
-        match: { any: documentIds },
+      if (documentIds && documentIds.length > 0) {
+        mustFilters.push({
+          key: 'documentId',
+          match: { any: documentIds },
+        });
+      }
+
+      const queryPromise = this.client.query(this.collectionName, {
+        query: queryVector,
+        limit,
+        score_threshold: scoreThreshold,
+        filter: {
+          must: mustFilters,
+        },
+        with_payload: true,
       });
+
+      const result = await withTimeout(
+        queryPromise,
+        5000,
+        'Qdrant vector query timed out after 5000ms'
+      );
+
+      const points = result.points || [];
+      return points.map((res: any) => ({
+        id: res.id,
+        score: res.score ?? 0,
+        payload: res.payload as unknown as VectorPayload,
+      }));
+    } catch (error: any) {
+      log.warn(
+        { error: error.message, userId },
+        'Vector search in Qdrant failed or timed out. Falling back to empty candidate set.'
+      );
+      return [];
     }
-
-    const result = await this.client.query(this.collectionName, {
-      query: queryVector,
-      limit,
-      score_threshold: scoreThreshold,
-      filter: {
-        must: mustFilters,
-      },
-      with_payload: true,
-    });
-
-    const points = result.points || [];
-    return points.map((res: any) => ({
-      id: res.id,
-      score: res.score ?? 0,
-      payload: res.payload as unknown as VectorPayload,
-    }));
   }
 
   /**
@@ -191,16 +213,25 @@ export class QdrantService {
       throw new Error('userId and documentId are required to delete vectors.');
     }
 
-    await this.client.delete(this.collectionName, {
-      filter: {
-        must: [
-          { key: 'userId', match: { value: userId } },
-          { key: 'documentId', match: { value: documentId } },
-        ],
-      },
-    });
+    try {
+      await withTimeout(
+        this.client.delete(this.collectionName, {
+          filter: {
+            must: [
+              { key: 'userId', match: { value: userId } },
+              { key: 'documentId', match: { value: documentId } },
+            ],
+          },
+        }),
+        5000,
+        'Qdrant delete timed out after 5000ms'
+      );
 
-    log.info({ userId, documentId }, 'Deleted document vectors from Qdrant.');
+      log.info({ userId, documentId }, 'Deleted document vectors from Qdrant.');
+    } catch (error: any) {
+      log.error({ error: error.message, userId, documentId }, 'Failed to delete document vectors from Qdrant.');
+      throw error;
+    }
   }
 
   /**

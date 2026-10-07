@@ -6,6 +6,7 @@ import { editOrSendTelegramResponse, escapeHtml } from '../../utils/telegram.js'
 import { quotaService } from '../../modules/users/quota.service.js';
 import { geminiDeduplicator } from '../../ai/cache/GeminiDeduplicator.js';
 import { mapGeminiErrorToUserMessage } from '../utils/geminiErrorMapper.js';
+import { withTimeout } from '../../utils/timeout.js';
 import { createChildLogger } from '../../utils/logger.js';
 
 const log = createChildLogger('explain.handler');
@@ -73,7 +74,11 @@ export async function handleExplainCommand(ctx: Context): Promise<void> {
   ctx.sendChatAction('typing').catch(() => {});
 
   try {
-    const result = await explainService.explainConcept(userId, concept);
+    const result = await withTimeout(
+      explainService.explainConcept(userId, concept),
+      45_000,
+      'Generating explanation took longer than expected. Please try again.'
+    );
     await quotaService.incrementStudyGenerationCount(userId);
 
     await editOrSendTelegramResponse(ctx, statusMsg?.message_id, result.explanation);
